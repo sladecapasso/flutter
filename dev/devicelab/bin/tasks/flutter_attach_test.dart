@@ -1,4 +1,4 @@
-// Copyright (c) 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,7 +33,7 @@ Future<void> testReload(Process process, { Future<void> Function() onListening }
     stdout.add(line);
     if (line.contains('Waiting') && onListening != null)
       listening.complete(onListening());
-    if (line.contains('To detach, press "d"; to quit, press "q".'))
+    if (line.contains('Quit (terminate the application on the device)'))
       ready.complete();
     if (line.contains('Reloaded '))
       reloaded.complete();
@@ -86,7 +86,7 @@ void main() {
   const String kActivityId = '$kAppId/com.yourcompany.integration_ui.MainActivity';
 
   task(() async {
-    final AndroidDevice device = await devices.workingDevice;
+    final AndroidDevice device = await devices.workingDevice as AndroidDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {
