@@ -247,7 +247,13 @@ class _SlidersState extends State<_Sliders> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               SliderTextField(
-                // TODO
+                onChanged: (double value){
+                  setState(() {
+                    _continuousValue = value;
+                  });
+                  print('New value: $value');
+                },
+                value: _continuousValue,
               ),
               Semantics(
                 label: 'Editable numerical value',

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ffi';
 import 'dart:math' as math;
 import 'dart:math';
 
@@ -1220,22 +1221,48 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 }
 
-class SliderTextField extends StatelessWidget{
+class SliderTextField extends StatefulWidget{
   SliderTextField({
     this.textStyle,
     this.inputDecoration,
+    this.onChanged,
+    this.textChangeTimeout = const Duration(seconds:1),
+    this.value,
   });
 
   /// TODO
   final TextStyle textStyle;
   final InputDecoration inputDecoration;
+  final ValueChanged<double> onChanged;
+  final Duration textChangeTimeout;
+  // TODO: make value a string
+  final double value;
+
+  @override
+  _SliderTextFieldState createState() => _SliderTextFieldState();
+}
+
+class _SliderTextFieldState extends State<SliderTextField> {
+  final TextEditingController _controller = TextEditingController();
+  Timer _timer;
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Function formatter should replace .round().toString()
+    _controller.text = widget.value.round().toString();
     return SizedBox(
       width: 60,
       height: 75,
       child: TextField(
+        onChanged: (String value){
+          if(_timer != null) {
+            _timer.cancel();
+          }
+          _timer = Timer(widget.textChangeTimeout, () {
+            widget.onChanged(double.parse(value));
+          });
+        },
+        controller: _controller,
         textAlign: TextAlign.center,
         textAlignVertical: TextAlignVertical.center,
         keyboardType: TextInputType.numberWithOptions(),
@@ -1257,5 +1284,4 @@ class SliderTextField extends StatelessWidget{
       )
     );
   }
-
 }
