@@ -1252,7 +1252,7 @@ class _SliderTextFieldState extends State<SliderTextField> {
     _controller.text = widget.value.round().toString();
     return SizedBox(
       width: 60,
-      height: 75,
+      height: 60,
       child: TextField(
         onChanged: (String value){
           if(_timer != null) {
@@ -1267,14 +1267,12 @@ class _SliderTextFieldState extends State<SliderTextField> {
         textAlignVertical: TextAlignVertical.center,
         keyboardType: TextInputType.numberWithOptions(),
         maxLines: 1,
-        maxLength: 3,
-        maxLengthEnforced: true,
         decoration: const InputDecoration(
           border: OutlineInputBorder(
             gapPadding: 1.0,
           ),
           filled: true,
-          fillColor: const Color(0xFFBDBDBD),
+          fillColor: const Color(0xFFEBEBEB),
         ),
         style: const TextStyle(
           fontSize: 20.0,
