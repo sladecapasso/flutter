@@ -1248,7 +1248,8 @@ class _SliderTextFieldState extends State<SliderTextField> {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: Function formatter should replace .round().toString()
+    // TODO: Take in a string, return a double
+    // TODO: when you click away it should leave focus
     _controller.text = widget.value.round().toString();
     return SizedBox(
       width: 60,
@@ -1268,16 +1269,18 @@ class _SliderTextFieldState extends State<SliderTextField> {
         keyboardType: TextInputType.numberWithOptions(),
         maxLines: 1,
         decoration: const InputDecoration(
-          border: OutlineInputBorder(
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Colors.transparent),
             gapPadding: 1.0,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFF1967D2), width: 2),
           ),
           filled: true,
           fillColor: const Color(0xFFEBEBEB),
         ),
         style: const TextStyle(
           fontSize: 20.0,
-          //height: 1.0,
-          color: const Color(0xFF212121)
         ),
       )
     );
