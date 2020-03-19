@@ -6,6 +6,8 @@ import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
 
+import 'object.dart';
+
 /// A object representation of a frame from a stack trace.
 ///
 /// {@tool snippet}
@@ -57,6 +59,18 @@ class StackFrame {
     source: '<asynchronous suspension>',
   );
 
+  /// A stack frame representing a Dart elided stack overflow frame.
+  static const StackFrame stackOverFlowElision = StackFrame(
+    number: -1,
+    column: -1,
+    line: -1,
+    method: '...',
+    packageScheme: '',
+    package: '',
+    packagePath: '',
+    source: '...',
+  );
+
   /// Parses a list of [StackFrame]s from a [StackTrace] object.
   ///
   /// This is normally useful with [StackTrace.current].
@@ -81,7 +95,7 @@ class StackFrame {
         ? RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
-    assert(match != null, 'Expecgted $line to match $parser.');
+    assert(match != null, 'Expected $line to match $parser.');
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
@@ -111,6 +125,8 @@ class StackFrame {
     assert(line != null);
     if (line == '<asynchronous suspension>') {
       return asynchronousSuspension;
+    } else if (line == '...') {
+      return stackOverFlowElision;
     }
 
     // Web frames.
@@ -226,5 +242,5 @@ class StackFrame {
   }
 
   @override
-  String toString() => '$runtimeType(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }

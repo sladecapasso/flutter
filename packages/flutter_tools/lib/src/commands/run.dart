@@ -8,6 +8,7 @@ import 'package:args/command_runner.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -22,7 +23,6 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../version.dart';
 import '../web/web_runner.dart';
 import 'daemon.dart';
 
@@ -101,6 +101,13 @@ class RunCommand extends RunCommandBase {
         negatable: false,
         help: 'Enable tracing of Skia code. This is useful when debugging '
               'the GPU thread. By default, Flutter will not log skia code.',
+      )
+      ..addFlag('endless-trace-buffer',
+        negatable: false,
+        help: 'Enable tracing to the endless tracer. This is useful when '
+              'recording huge amounts of traces. If we need to use endless buffer to '
+              'record startup traces, we can combine the ("--trace-startup"). '
+              'For exemple, flutter run --trace-startup --endless-trace-buffer. ',
       )
       ..addFlag('trace-systrace',
         negatable: false,
@@ -186,10 +193,12 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      // TODO(jonahwilliams): Off by default with investigating whether this
+      // is slower for certain use cases.
+      // See: https://github.com/flutter/flutter/issues/49499
       ..addFlag('fast-start',
         negatable: true,
         defaultsTo: false,
-        hide: true,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
@@ -318,10 +327,6 @@ class RunCommand extends RunCommandBase {
       await super.validateCommand();
     }
 
-    if (boolArg('fast-start') && runningWithPrebuiltApplication) {
-      throwToolExit('--fast-start is not supported with --use-application-binary');
-    }
-
     devices = await findAllTargetDevices();
     if (devices == null) {
       throwToolExit(null);
@@ -352,6 +357,7 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: boolArg('skia-deterministic-rendering'),
         traceSkia: boolArg('trace-skia'),
         traceSystrace: boolArg('trace-systrace'),
+        endlessTraceBuffer: boolArg('endless-trace-buffer'),
         dumpSkpOnShaderCompilation: dumpSkpOnShaderCompilation,
         cacheSkSL: cacheSkSL,
         deviceVmServicePort: deviceVmservicePort,
@@ -364,7 +370,9 @@ class RunCommand extends RunCommandBase {
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.
-        fastStart: boolArg('fast-start') && devices.every((Device device) => device.supportsFastStart),
+        fastStart: boolArg('fast-start')
+          && !runningWithPrebuiltApplication
+          && devices.every((Device device) => device.supportsFastStart),
       );
     }
   }
@@ -421,18 +429,12 @@ class RunCommand extends RunCommandBase {
     }
     globals.terminal.usesTerminalUi = true;
 
-    if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
+    if (argResults['dart-flags'] != null && !globals.flutterVersion.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '
                            'channel.', null);
     }
 
     for (final Device device in devices) {
-      if (!device.supportsFastStart && boolArg('fast-start')) {
-        globals.printStatus(
-          'Using --fast-start option with device ${device.name}, but this device '
-          'does not support it. Overriding the setting to false.'
-        );
-      }
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;

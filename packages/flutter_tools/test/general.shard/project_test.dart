@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -29,7 +28,7 @@ void main() {
       testInMemory('fails on null directory', () async {
         expect(
           () => FlutterProject.fromDirectory(null),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsAssertionError,
         );
       });
 
@@ -41,7 +40,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
@@ -53,7 +52,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
@@ -65,7 +64,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsToolExit(),
         );
       });
 
@@ -110,7 +109,7 @@ void main() {
         final FlutterProject project = await someProject();
         await expectLater(
           project.android.makeHostAppEditable(),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsAssertionError,
         );
       });
       testInMemory('exits on already editable module', () async {
@@ -389,7 +388,7 @@ apply plugin: 'kotlin-android'
               });
             }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
 
@@ -404,7 +403,7 @@ apply plugin: 'kotlin-android'
             });
           }
         );
-        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        when(mockPlistUtils.getValueFromFile(any, any)).thenReturn(r'$(PRODUCT_BUNDLE_IDENTIFIER).$(SUFFIX)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {

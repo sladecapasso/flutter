@@ -180,7 +180,7 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object> json, Dia
   }
   expect(json['propertyType'], equals(property.propertyType.toString()));
   expect(json.containsKey('defaultLevel'), isTrue);
-  if (property.value is Diagnosticable) {
+  if (property.value is DiagnosticableMixin) {
     expect(json['isDiagnosticableValue'], isTrue);
   } else {
     expect(json.containsKey('isDiagnosticableValue'), isFalse);
@@ -1914,9 +1914,11 @@ void main() {
             '--- example property at max length --',
             style: propertyStyle,
           ),
-          DiagnosticsProperty<void>(null,
-              'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
-              allowWrap: false),
+          DiagnosticsProperty<String>(
+            null,
+            'Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap even though it is very long. Message that is not allowed to wrap.',
+            allowWrap: false,
+          ),
           DiagnosticsNode.message(
             '--- example property at max length --',
             style: propertyStyle,

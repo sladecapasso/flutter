@@ -37,7 +37,7 @@ void main() {
       if (globals.platform.isWindows) {
         flutterRootUri
             ..write('/')
-            ..write(canonicalizedFlutterRootPath.replaceAll('\\', '/'));
+            ..write(canonicalizedFlutterRootPath.replaceAll(r'\', '/'));
       } else {
         flutterRootUri.write(canonicalizedFlutterRootPath);
       }
@@ -342,7 +342,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.headline4,
             ),
           ],
         ),

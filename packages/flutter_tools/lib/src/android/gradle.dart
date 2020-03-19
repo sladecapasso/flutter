@@ -338,6 +338,12 @@ Future<void> buildGradleApp({
   if (androidBuildInfo.fastStart) {
     command.add('-Pfast-start=true');
   }
+  if (androidBuildInfo.buildInfo.splitDebugInfoPath != null) {
+    command.add('-Psplit-debug-info=${androidBuildInfo.buildInfo.splitDebugInfoPath}');
+  }
+  if (androidBuildInfo.buildInfo.treeShakeIcons) {
+    command.add('-Ptree-shake-icons=true');
+  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
@@ -546,6 +552,22 @@ Future<void> buildGradleAar({
     command.add('-Plocal-engine-repo=${localEngineRepo.path}');
     command.add('-Plocal-engine-build-mode=${androidBuildInfo.buildInfo.modeName}');
     command.add('-Plocal-engine-out=${localEngineArtifacts.engineOutPath}');
+    if (androidBuildInfo.buildInfo.treeShakeIcons) {
+      command.add('-Pfont-subset=true');
+    }
+
+    // Copy the local engine repo in the output directory.
+    try {
+      globals.fsUtils.copyDirectorySync(
+        localEngineRepo,
+        getRepoDirectory(outputDirectory),
+      );
+    } on FileSystemException catch(_) {
+      throwToolExit(
+        'Failed to copy the local engine ${localEngineRepo.path} repo '
+        'in ${outputDirectory.path}'
+      );
+    }
   }
 
   command.add(aarTask);
@@ -620,7 +642,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 
   for (final String buildMode in buildModes) {
     globals.printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber\'''');
   }
 
   globals.printStatus('''
@@ -642,7 +664,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 ''');
   }
 
-  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
+  globals.printStatus('To learn more, visit https://flutter.dev/go/build-aar');
 }
 
 String _hex(List<int> bytes) {
@@ -725,10 +747,11 @@ Future<void> buildPluginsAsAar(
     try {
       await buildGradleAar(
         project: FlutterProject.fromDirectory(pluginDirectory),
-        androidBuildInfo: const AndroidBuildInfo(
+        androidBuildInfo: AndroidBuildInfo(
           BuildInfo(
             BuildMode.release, // Plugins are built as release.
             null, // Plugins don't define flavors.
+            treeShakeIcons: androidBuildInfo.buildInfo.treeShakeIcons,
           ),
         ),
         target: '',
@@ -877,7 +900,7 @@ String _getLocalArtifactVersion(String pomPath) {
     );
   } on FileSystemException {
     throwToolExit(
-      'Error reading $pomPath. Please ensure that you have read permission to this'
+      'Error reading $pomPath. Please ensure that you have read permission to this '
       'file and try again.');
   }
   final Iterable<xml.XmlElement> project = document.findElements('project');

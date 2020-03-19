@@ -87,8 +87,8 @@ class PathAnimation {
         final String currentCommandType = frame.paths[pathIdx].commands[commandIdx].type;
         if (commandType != currentCommandType)
           throw Exception(
-              'Paths must be built from the same commands in all frames'
-              'command $commandIdx at frame 0 was of type \'$commandType\''
+              'Paths must be built from the same commands in all frames '
+              'command $commandIdx at frame 0 was of type \'$commandType\' '
               'command $commandIdx at frame $i was of type \'$currentCommandType\''
           );
         for (int j = 0; j < numPointsInCommand; j += 1)
@@ -292,7 +292,7 @@ class SvgPath {
   final List<SvgPathCommand> commands;
   final double opacity;
 
-  static const String _pathCommandAtom = ' *([a-zA-Z]) *([\-\.0-9 ,]*)';
+  static const String _pathCommandAtom = r' *([a-zA-Z]) *([\-\.0-9 ,]*)';
   static final RegExp _pathCommandValidator = RegExp('^($_pathCommandAtom)*\$');
   static final RegExp _pathCommandMatcher = RegExp(_pathCommandAtom);
 
@@ -460,7 +460,7 @@ class _Transform {
 }
 
 
-const String _transformCommandAtom = ' *([^(]+)\\(([^)]*)\\)';
+const String _transformCommandAtom = r' *([^(]+)\(([^)]*)\)';
 final RegExp _transformValidator = RegExp('^($_transformCommandAtom)*\$');
 final RegExp _transformCommand = RegExp(_transformCommandAtom);
 
@@ -522,7 +522,7 @@ Matrix3 _matrix(double a, double b, double c, double d, double e, double f) {
 
 // Matches a pixels expression e.g "14px".
 // First group is just the number.
-final RegExp _pixelsExp = RegExp('^([0-9]+)px\$');
+final RegExp _pixelsExp = RegExp(r'^([0-9]+)px$');
 
 /// Parses a pixel expression, e.g "14px", and returns the number.
 /// Throws an [ArgumentError] if the given string doesn't match the pattern.

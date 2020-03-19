@@ -13,7 +13,6 @@ import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
 import '../globals.dart' as globals;
-import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
 import 'channel.dart';
@@ -50,14 +49,13 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
-    await _commandRunner.runCommand(
+  Future<FlutterCommandResult> runCommand() {
+    return _commandRunner.runCommand(
       boolArg('force'),
       boolArg('continue'),
       GitTagVersion.determine(),
-      FlutterVersion.instance,
+      globals.flutterVersion,
     );
-    return null;
   }
 }
 
@@ -74,7 +72,7 @@ class UpgradeCommandRunner {
     } else {
       await runCommandSecondHalf(flutterVersion);
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> runCommandFirstHalf(
@@ -145,12 +143,12 @@ class UpgradeCommandRunner {
   // re-entrantly with the `--continue` flag
   Future<void> runCommandSecondHalf(FlutterVersion flutterVersion) async {
     // Make sure the welcome message re-display is delayed until the end.
-    persistentToolState.redisplayWelcomeMessage = false;
+    globals.persistentToolState.redisplayWelcomeMessage = false;
     await precacheArtifacts();
     await updatePackages(flutterVersion);
     await runDoctor();
     // Force the welcome message to re-display following the upgrade.
-    persistentToolState.redisplayWelcomeMessage = true;
+    globals.persistentToolState.redisplayWelcomeMessage = true;
   }
 
   Future<bool> hasUncomittedChanges() async {
@@ -164,8 +162,8 @@ class UpgradeCommandRunner {
     } on ProcessException catch (error) {
       throwToolExit(
         'The tool could not verify the status of the current flutter checkout. '
-        'This might be due to git not being installed or an internal error.'
-        'If it is okay to ignore potential local changes, then re-run this'
+        'This might be due to git not being installed or an internal error. '
+        'If it is okay to ignore potential local changes, then re-run this '
         'command with --force.'
         '\nError: $error.'
       );
@@ -213,7 +211,7 @@ class UpgradeCommandRunner {
     } on ProcessException catch (error) {
       throwToolExit(
         'Unable to upgrade Flutter: The tool could not update to the version $tag. '
-        'This may be due to git not being installed or an internal error.'
+        'This may be due to git not being installed or an internal error. '
         'Please ensure that git is installed on your computer and retry again.'
         '\nError: $error.'
       );
